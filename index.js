@@ -27,7 +27,8 @@ app.use(cors({
 app.use(middlewares.checkTokenSetUser);
 app.use("/api/auth", auth);
 
-app.listen(3000, () => {
+// listen to port 3000 or asigned by server env variable
+app.listen(process.env.PORT || 3000, () => {
   console.log("Listening on port 3000");
   console.log(process.env.JWT_KEY);
 });
