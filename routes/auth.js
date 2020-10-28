@@ -88,15 +88,18 @@ router.post("/create_user", (req, res) => {
   } else {
     //request body is valid schema
     //check if user exists
+    console.log("Shcema Ok, checkin for user in DB");
     usersDB.find({
       UserName: req.body.UserName
     }, (DBerror, docs) => {
+      console.log("DB callback");
       var error = 0;
       if (req.body.UserName == null || req.body.Secret == null) error = "missing_field";
       if (docs.length > 0) error = "user_unavailable"; // user exists
       if (!error) {
         //if no error insert user in DB
         //TODO: hash password before
+        console.log("no DB error, generating key");
         // crerate key for sensors
         const sensorKey = rand.generateKey(12);
         const doc = {
