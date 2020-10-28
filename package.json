@@ -1,0 +1,29 @@
+{
+  "name": "wattapp-backend",
+  "version": "1.0.0",
+  "description": "Sensor loggin app",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Agustin-Q/WattApp-backend.git"
+  },
+  "author": "Agustin Queija",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Agustin-Q/WattApp-backend/issues"
+  },
+  "homepage": "https://github.com/Agustin-Q/WattApp-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "generate-key": "0.0.6",
+    "joi": "^17.3.0",
+    "jsonwebtoken": "^8.5.1",
+    "nedb": "^1.8.0",
+    "volleyball": "^1.5.1"
+  }
+}
