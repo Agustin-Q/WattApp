@@ -6,18 +6,17 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const rand = require('generate-key')
 const middlewares = require('../middlewares/middlewares.js');
-
-
 const monk = require('monk');
+
+//setting up DBs
 const url = 'localhost:27017/WattAppDB';
 const db = monk(url);
 db.then(() => {
-  console.log('Connected correctly to server')
+  console.log('Connected correctly to database server')
 });
 
 const usersDB = db.get('users');
-// const usersDB = new Datastore("usersDB.db");
-// usersDB.loadDatabase();
+
 
 const createUserSchema = Joi.object({
   UserName: Joi.string().alphanum().min(3).max(30).required(),
@@ -143,14 +142,15 @@ router.post('/sensorKey', middlewares.checkAuth, (req, res) =>{
   usersDB.update(
     {UserName: req.user.UserName},
     {$set: {SensorKey: rand.generateKey(12)}},
-    {returnUpdatedDocs: true},
-    (dbErr, numAffected, affectedDocuments, upsert) => {
+    {},
+    (dbErr, matchedCount,) => {
       console.log('DB callback');
       console.log(dbErr);
       if(!dbErr){
         console.log('Update OK, returning affected documents...')
-        console.log(affectedDocuments);
-        res.json(affectedDocuments)
+        console.log('matchedCount: ');
+        console.log(matchedCount);
+        respondeWithSensorKey(req,res);
       } else {
         console.log('update error')
         res.json(dbErr);
@@ -159,6 +159,10 @@ router.post('/sensorKey', middlewares.checkAuth, (req, res) =>{
 });
 
 router.get('/sensorKey', middlewares.checkAuth, (req, res) =>{
+  respondeWithSensorKey(req, res);
+});
+
+function respondeWithSensorKey(req, res){
   console.log('Sensor Key Request for user: ' + req.user.UserName);
   usersDB.find(
     {UserName: req.user.UserName},
@@ -174,7 +178,7 @@ router.get('/sensorKey', middlewares.checkAuth, (req, res) =>{
         res.json(dbErr);
       }
   });
-});
+}
 
 
 function errorMsg(errorCode) {

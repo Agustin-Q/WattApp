@@ -9,21 +9,19 @@ const auth = require("./routes/auth.js");
 const cors = require('cors');
 const middlewares = require('./middlewares/middlewares.js');
 const monk = require('monk');
+
+// Setting up DB
 const url = 'localhost:27017/WattAppDB';
 
 const db = monk(url);
 db.then(() => {
-  console.log('Connected correctly to server')
+  console.log('Connected correctly to database server')
 });
 
 const usersDB = db.get('users');
 const database = db.get('sensorData');
-// Database set
-// const database = new Datastore("database.db");
-// database.loadDatabase();
-// const usersDB = new Datastore("usersDB.db");
-// usersDB.loadDatabase();
 
+// Setting Middlewares
 const app = express();
 app.use(volleyball);
 app.use(express.static("public"));
@@ -79,10 +77,7 @@ app.get("/api", middlewares.checkAuth, (req, res) => {
 
 console.log(fromTime);
   database
-  .find({UserName: req.user.UserName, TimeStamp: { $gt: fromTime }})
-  .sort({TimeStamp: -1})
-  .limit(limitRecords)
-  .exec((error, data) => {
+  .find({UserName: req.user.UserName, TimeStamp: { $gt: fromTime }}, {sort: {TimeStamp: -1}, limit: limitRecords}, (error, data) => {
     if (error != null) {      
       console.log("Database Query Error:");
       console.log(error);
