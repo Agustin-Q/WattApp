@@ -30,7 +30,7 @@ function  createTokenSendResponse (user, res) {
     userID: user._id
   },
   process.env.JWT_KEY, {
-    expiresIn: "1h"
+    expiresIn: "1y"
   });
   res.json({
     status: "success",
