@@ -1,15 +1,23 @@
 /* jshint esversion: 8 */
 const express = require("express");
 const router = express.Router();
-const Datastore = require("nedb");
+// const Datastore = require("nedb");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const rand = require('generate-key')
 const middlewares = require('../middlewares/middlewares.js');
 
 
-const usersDB = new Datastore("usersDB.db");
-usersDB.loadDatabase();
+const monk = require('monk');
+const url = 'localhost:27017/WattAppDB';
+const db = monk(url);
+db.then(() => {
+  console.log('Connected correctly to server')
+});
+
+const usersDB = db.get('users');
+// const usersDB = new Datastore("usersDB.db");
+// usersDB.loadDatabase();
 
 const createUserSchema = Joi.object({
   UserName: Joi.string().alphanum().min(3).max(30).required(),

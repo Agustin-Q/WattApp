@@ -8,12 +8,21 @@ require('dotenv').config();
 const auth = require("./routes/auth.js");
 const cors = require('cors');
 const middlewares = require('./middlewares/middlewares.js');
+const monk = require('monk');
+const url = 'localhost:27017/WattAppDB';
 
+const db = monk(url);
+db.then(() => {
+  console.log('Connected correctly to server')
+});
+
+const usersDB = db.get('users');
+const database = db.get('sensorData');
 // Database set
-const database = new Datastore("database.db");
-database.loadDatabase();
-const usersDB = new Datastore("usersDB.db");
-usersDB.loadDatabase();
+// const database = new Datastore("database.db");
+// database.loadDatabase();
+// const usersDB = new Datastore("usersDB.db");
+// usersDB.loadDatabase();
 
 const app = express();
 app.use(volleyball);
