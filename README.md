@@ -22,3 +22,26 @@
 ## ToDo's 💪
 
 [x] Migrate to Mongo DB
+[ ] Handle DB connection error
+[ ] Define schema for incoming sensor data
+[ ] Validate incoming sensor data
+
+
+------------------------------------------------
+### Sensor data schema
+
+```javascript
+{
+  UserName:"myName",
+  DeviceName: "myDeviceName",
+  SensorKey:"myKey",
+  SensorData: [
+    {value: 1234, unit: "kW", timeStamp: 164855498},
+    {value: 1234, unit: "kW", timeStamp: 164855498},
+    {value: 1234, unit: "kW", timeStamp: 164855498},
+    {...},
+    {value: 1234, unit: "kW", timeStamp: 164855498},
+    ],
+  ServerTimeStamp: 1604190950 // added by the server
+  }
+```
