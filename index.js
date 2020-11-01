@@ -11,9 +11,7 @@ const middlewares = require('./middlewares/middlewares.js');
 const monk = require('monk');
 
 // Setting up DB
-const url = 'localhost:27017/WattAppDB';
-
-const db = monk(url);
+const db = monk(process.env.DATABASE_URL);
 db.then(() => {
   console.log('Connected correctly to database server')
 });
@@ -39,25 +37,6 @@ app.listen(process.env.PORT || 3000, () => {
   console.log("Listening on port 3000");
   console.log(process.env.JWT_KEY);
 });
-
-
-/*
-const checkAuth = (req, res,next)=>{
-  try {
-    //console.log(req.headers.authorization);
-    const token = req.headers.authorization.split(" ")[1];
-    //console.log(token);
-    const decoded = jwt.verify(token, process.env.JWT_KEY);
-    req.userData = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({
-      message: "Auth failed"
-    });
-  }
-};
-*/
-
 
 /*-----------------
 GET, siempre tiene que devolver los registros ordenados en orden tiempo

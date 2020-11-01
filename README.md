@@ -21,4 +21,4 @@
 --------------------------------------------------
 ## ToDo's 💪
 
-[ ] Migrate to Mongo DB
+[x] Migrate to Mongo DB

@@ -9,8 +9,7 @@ const middlewares = require('../middlewares/middlewares.js');
 const monk = require('monk');
 
 //setting up DBs
-const url = 'localhost:27017/WattAppDB';
-const db = monk(url);
+const db = monk(process.env.DATABASE_URL);
 db.then(() => {
   console.log('Connected correctly to database server')
 });
