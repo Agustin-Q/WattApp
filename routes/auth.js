@@ -11,7 +11,7 @@ const monk = require('monk');
 //setting up DBs
 const db = monk(process.env.DATABASE_URL);
 db.then(() => {
-  console.log('Connected correctly to database server')
+  console.log('Connected correctly to database server: ' + process.env.DATABASE_URL)
 });
 
 const usersDB = db.get('users');
