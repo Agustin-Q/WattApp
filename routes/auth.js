@@ -1,25 +1,19 @@
 /* jshint esversion: 8 */
 const express = require("express");
 const router = express.Router();
-// const Datastore = require("nedb");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const rand = require('generate-key')
 const middlewares = require('../middlewares/middlewares.js');
-const monk = require('monk');
+const db = require('../database/database.js');
 
 //setting up DBs
-const db = monk(process.env.DATABASE_URL);
-db.then(() => {
-  console.log('Connected correctly to database server: ' + process.env.DATABASE_URL)
-});
-
-const usersDB = db.get('users');
+const usersDB = db.usersDB;
 
 
 const createUserSchema = Joi.object({
   UserName: Joi.string().alphanum().min(3).max(30).required(),
-  Secret: Joi.string().trim().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required()
+  Password: Joi.string().trim().pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required()
 });
 
 function  createTokenSendResponse (user, res) {
@@ -39,7 +33,7 @@ function  createTokenSendResponse (user, res) {
 // pre-pended with /api/auth
 
 router.get("/login", (req, res) => {
-  console.log("la re concha de tu madre!!");
+  console.log("Login request");
   if (req.user){
     res.json(req.user);
   } else {
@@ -64,7 +58,7 @@ router.post("/login", (req, res) => {
   usersDB.find({
     UserName: req.body.UserName
   }, (DBerror, docs) => {
-    if (docs.length >= 1 && req.body.Secret == docs[0].Secret) {
+    if (docs.length >= 1 && req.body.Password == docs[0].Password) {
       //succes, respond with token
       console.log('Responding with token.');
       createTokenSendResponse(docs[0], res);
@@ -94,24 +88,22 @@ router.post("/create_user", (req, res) => {
   } else {
     //request body is valid schema
     //check if user exists
-    console.log("Shcema Ok, checkin for user in DB");
+    console.log("Schema Ok, checking for user in DB");
     usersDB.find({
       UserName: req.body.UserName
     }, (DBerror, docs) => {
       console.log("DB callback");
       var error = 0;
-      if (req.body.UserName == null || req.body.Secret == null) error = "missing_field";
       if (docs.length > 0) error = "user_unavailable"; // user exists
       if (!error) {
         //if no error insert user in DB
         //TODO: hash password before
         console.log("no DB error, generating key");
-        // crerate key for sensors
-        const sensorKey = rand.generateKey(12);
+        // create key for sensors
         const doc = {
           UserName: req.body.UserName,
-          Secret: req.body.Secret,
-          SensorKey: sensorKey
+          Password: req.body.Password,
+          Devices: []
         };
         usersDB.insert(doc, (err, newUser) =>{
           if (!err) {
@@ -183,7 +175,7 @@ function respondeWithSensorKey(req, res){
 function errorMsg(errorCode) {
   switch (errorCode) {
     case "missing_field":
-      return "ERROR: Missing UserName or Secret";
+      return "ERROR: Missing UserName or Password";
     case "user_unavailable":
       return "ERROR: UserName is already in use. Please select other UserName";
   }

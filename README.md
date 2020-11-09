@@ -21,9 +21,15 @@
 --------------------------------------------------
 ## ToDo's 💪
 
+[x] Update User Creation to new schema
+[x] Drop the user collection
+[x] add route for creating Devices
+[x] Modify route for generating DeviceKey
+[ ] Add route for creating Sensors
+[ ] Modify api/ route for new incoming data
 [x] Migrate to Mongo DB
 [ ] Handle DB connection error
-[ ] Define schema for incoming sensor data
+[x] Define schema for incoming sensor data
 [ ] Validate incoming sensor data
 
 
@@ -34,28 +40,55 @@
 {
   UserName: "myName",
   Password: "myPassword",
-  devices: [
+  Devices: [
     {
-    deviceName: "myDeviceName", 
-    deviceDescription: "deviceDescription",
-    deviceKey: "gRfgGHr4H54fghsfdg"
-    sensors:[
+    DeviceName: "myDeviceName", 
+    DeviceDescription: "deviceDescription",
+    DeviceKey: "gRfgGHr4H54fghsfdg"
+    Sensors:[
       {
-      sensorIndex:0, // igual al index en el array
-      sensorType:"sensorType",
-      sensorUnit: "sensorUnit",
+      SensorIndex:0, // igual al index en el array
+      SensorType:"sensorType",
+      SensorUnit: "sensorUnit",
       },
+    ]
     },
   ]
 }
 ```
+new user:
+
+```javascript
+{
+  UserName: "myName",
+  Password: "myPassword",
+  Devices: [
+    {
+    DeviceName: "myDeviceName", 
+    DeviceDescription: "deviceDescription",
+    DeviceKey: "gRfgGHr4H54fghsfdg"
+    Sensors:[]
+    },
+  ]
+}
+```
+
+```javascript
+{
+  UserName: "myName",
+  Password: "myPassword",
+  Devices: [  ]
+}
+```
+
+
 
 ### sensor data schema
 
 ```javascript
 {
   UserName:"myName", //added by server
-  deviceName: "myDeviceName",  //added by server
+  DeviceName: "myDeviceName",  //added by server
   SensorData: [
     {
     sensorIndex: 0,

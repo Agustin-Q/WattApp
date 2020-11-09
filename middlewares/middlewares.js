@@ -32,12 +32,12 @@ function checkTokenSetUser(req, res, next) {
 }
 
 function checkAuth(req, res, next) {
-  console.log('checkLoggedin');
+  console.log('checkLoggedIn');
   if (req.user){
-    console.log('User loggedin!');
+    console.log('User logged!');
     next();
   } else {
-    console.log('User NOT loggedin!');
+    console.log('User NOT logged!');
     res.status(401);
     throw new Error('Auth Failed')
   }

@@ -6,18 +6,15 @@ const jwt = require("jsonwebtoken");
 const volleyball = require("volleyball");
 require('dotenv').config();
 const auth = require("./routes/auth.js");
+const manage = require("./routes/manage.js");
 const cors = require('cors');
 const middlewares = require('./middlewares/middlewares.js');
-const monk = require('monk');
+const db = require('./database/database.js');
+
 
 // Setting up DB
-const db = monk(process.env.DATABASE_URL);
-db.then(() => {
-  console.log('Connected correctly to database server: '  + process.env.DATABASE_URL)
-});
-
-const usersDB = db.get('users');
-const database = db.get('sensorData');
+const usersDB = db.usersDB;
+const database = db.sensorDataDB;
 
 // Setting Middlewares
 const app = express();
@@ -31,6 +28,8 @@ app.use(cors({
 }))
 app.use(middlewares.checkTokenSetUser);
 app.use("/api/auth", auth);
+app.use(middlewares.checkAuth);
+app.use("/api/manage", manage);
 
 // listen to port 3000 or asigned by server env variable
 app.listen(process.env.PORT || 3000, () => {
