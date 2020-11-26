@@ -28,7 +28,6 @@ app.use(cors({
 }))
 app.use(middlewares.checkTokenSetUser);
 app.use("/api/auth", auth);
-app.use(middlewares.checkAuth);
 app.use("/api/manage", manage);
 
 // listen to port 3000 or asigned by server env variable
@@ -81,7 +80,7 @@ Schema validation all are required:
     number
 
 -----------------------------------------------*/
-app.post("/api", (req, res) => {
+app.post("/apiv0", (req, res) => {
   let date = new Date(Date.now()).toLocaleString();
   console.log(date + ": Got a POST request on /api from " + req.hostname + " with body:");
   console.log(req.body);
@@ -110,6 +109,52 @@ app.post("/api", (req, res) => {
         message: 'Invalid Sensor Key or UserName'
       });
     }
+  });
+});
+
+//------------------
+app.post("/api", (req, res, next) => {
+  console.log('Request on /api with device key: ', req.body.DeviceKey)
+  usersDB.find({'Devices.DeviceKey' : req.body.DeviceKey},
+  {projection: {Devices: {$elemMatch: {DeviceKey: req.body.DeviceKey}}, UserName: 1}},
+  (dbError, docs)=>{
+    //falta handel dberror
+    console.log(docs);
+    if(docs.length != 1){
+      // incorrect key or duplicate key (very very unlikely)
+      // respond with auth failed
+      console.log("incorrect key or duplicate key (very very unlikely");
+      res.statusCode = 401;
+      return next(new Error('Auth Failed.'));
+    }
+    let docToInsert = {
+      UserName : docs[0].UserName,
+      DeviceName: docs[0].Devices[0].DeviceName,
+      ServerTimeStamp: Date.now(),
+      SensorData:[]
+    }
+    console.log(req.body);
+    let sensors = docs[0].Devices[0].Sensors;
+    for(let i=0; i < req.body.Values.length; i++){
+      let sensIndex = req.body.Values[i].SensorIndex;
+      if(sensIndex < sensors.length){
+        console.log('sensor index ' + sensIndex);
+        docToInsert.SensorData.push({        
+          SensorName: sensors[sensIndex].SensorName,
+          Value: req.body.Values[i].Value,
+          Unit: sensors[sensIndex].SensorUnit,
+          TimeStamp: req.body.Values[i].TimeStamp
+        });
+      } else {
+        res.statusCode = 400;
+        console.log('Sensor index ' + sensIndex + ' is out of range.')
+        return next(new Error('Sensor index out of range.'));
+      }
+    }
+    database.insert(docToInsert, (dbError, result) =>{
+      if(dbError) return res.json(dbError)
+      return res.json({status: 'success'})
+    })
   });
 });
 
