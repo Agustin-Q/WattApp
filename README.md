@@ -31,6 +31,9 @@
 [ ] Handle DB connection error
 [x] Define schema for incoming sensor data
 [ ] Validate incoming sensor data
+[ ] handel bad request when creating devices
+[ ] handel bad request when creating sensors
+
 
 
 ------------------------------------------------
