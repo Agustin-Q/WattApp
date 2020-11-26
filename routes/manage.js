@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const rand = require('generate-key')
-//const middlewares = require('../middlewares/middlewares.js');
+const middlewares = require('../middlewares/middlewares.js');
 const db = require('../database/database.js');
 
 //Device Schema
@@ -11,6 +11,38 @@ const deviceSchema = Joi.object({
   DeviceDescription: Joi.string().min(3).max(140).required()
 });
 
+//Sensor Schema
+const sensorSchema = Joi.object({
+  DeviceName: Joi.string().alphanum().min(3).max(30).required(),
+  SensorName: Joi.string().alphanum().min(3).max(30).required(),
+  SensorType: Joi.string().alphanum().min(3).max(30).required(),
+  SensorUnit: Joi.string().alphanum().min(1).max(30).required()
+});
+
+router.use(middlewares.checkAuth);
+
+router.post('/sensors', (req, res, next)=>{
+  console.log('Here we create sensors!');
+  console.log(req.body);
+  let validationResult = sensorSchema.validate(req.body);
+  if (validationResult.error) throw new Error(validationResult.error);
+  db.usersDB.find({UserName: req.user.UserName, "Devices.Sensors.SensorName": req.body.SensorName}, (dbError, docs) =>{
+    if (docs.length>0) return next(new Error('Failed.Sensor already exists.'));
+    db.usersDB.update({UserName: req.user.UserName,
+      "Devices.DeviceName": req.body.DeviceName},
+      {$push:{
+        "Devices.$.Sensors": {
+          SensorName: req.body.SensorName,
+          SensorType: req.body.SensorType,
+          SensorUnit: req.body.SensorUnit
+        }
+      }
+    }, (dbError, matchedCount) => {
+      if(dbError) return next(dbError);
+      res.json({status: 'success'});
+    });
+  });
+});
 
 router.post('/devices', (req, res, next) => {
   console.log('Here we create devices!');
@@ -90,8 +122,8 @@ router.get('/deviceKey', (req, res, next) =>{
 function respondWithDeviceKey(req, res, next){
   console.log('Device Key Request for user: ' + req.user.UserName);
   db.usersDB.find(
-    {UserName: req.user.UserName, "Devices.DeviceName": req.query.DeviceName},
-    {projection: {Devices: {$elemMatch:{DeviceName: req.query.DeviceName}}}},
+    {UserName: req.user.UserName, "Devices.DeviceName": req.body.DeviceName},
+    {projection: {Devices: {$elemMatch:{DeviceName: req.body.DeviceName}}}},
     (dbErr, docs) => {
       if(docs.length == 0) return next(new Error("Device not Found"));
       console.log('DB callback');

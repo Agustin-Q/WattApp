@@ -128,48 +128,7 @@ router.post("/create_user", (req, res) => {
   }
 });
 
-router.post('/sensorKey', middlewares.checkAuth, (req, res) =>{
-  console.log('New Sensor Key Request for user: ' + req.user.UserName);
-  usersDB.update(
-    {UserName: req.user.UserName},
-    {$set: {SensorKey: rand.generateKey(12)}},
-    {},
-    (dbErr, matchedCount,) => {
-      console.log('DB callback');
-      console.log(dbErr);
-      if(!dbErr){
-        console.log('Update OK, returning affected documents...')
-        console.log('matchedCount: ');
-        console.log(matchedCount);
-        respondeWithSensorKey(req,res);
-      } else {
-        console.log('update error')
-        res.json(dbErr);
-      }
-  });
-});
 
-router.get('/sensorKey', middlewares.checkAuth, (req, res) =>{
-  respondeWithSensorKey(req, res);
-});
-
-function respondeWithSensorKey(req, res){
-  console.log('Sensor Key Request for user: ' + req.user.UserName);
-  usersDB.find(
-    {UserName: req.user.UserName},
-    (dbErr, docs) => {
-      console.log('DB callback');
-      console.log(dbErr);
-      if(!dbErr){
-        console.log('Ok, returning key')
-        console.log(docs);
-        res.json({SensorKey: docs[0].SensorKey})
-      } else {
-        console.log('db error')
-        res.json(dbErr);
-      }
-  });
-}
 
 
 function errorMsg(errorCode) {
