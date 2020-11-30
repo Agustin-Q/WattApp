@@ -169,7 +169,7 @@ function errorHandeler(err, req, res, next) {
   console.log('Error handeler');
   console.log(res.statusCode);
   console.log(err);
-  if(!res.statusCode) res.status(500);
+  if(!res.statusCode || res.statusCode == 200) res.status(500);
   res.json({
     message: err.message,
     // stack: err.stack,

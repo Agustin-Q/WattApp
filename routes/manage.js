@@ -49,7 +49,10 @@ router.post('/devices', (req, res, next) => {
   console.log(req.body);
   let validationResult = deviceSchema.validate(req.body);
   console.log(validationResult.error);
-  if (validationResult.error) throw new Error(validationResult.error);
+  if (validationResult.error) {
+    res.status(400);
+    throw new Error(validationResult.error);
+  }
   //get user data form db
   db.usersDB.find({UserName: req.user.UserName, "Devices.DeviceName": req.body.DeviceName}, (dbError, docs) => {
     console.log('DB callback')
@@ -63,6 +66,7 @@ router.post('/devices', (req, res, next) => {
     }
     console.log(docs[0]);
     console.log('Inserting device to DB!');
+    const newDeviceKey = rand.generateKey(12);
     db.usersDB.update({
       UserName: req.user.UserName
     },
@@ -71,12 +75,17 @@ router.post('/devices', (req, res, next) => {
         Devices: {
           DeviceName: req.body.DeviceName,
           DeviceDescription: req.body.DeviceDescription,
-          DeviceKey: rand.generateKey(12),
+          DeviceKey: newDeviceKey,
           Sensors: [],  
         }
       }
     });
-    res.json(req.body);
+    res.json({
+      DeviceName: req.body.DeviceName,
+      DeviceDescription: req.body.DeviceDescription,
+      DeviceKey: newDeviceKey,
+      Sensors: [],
+    });
   });
   
 
