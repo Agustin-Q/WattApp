@@ -11,7 +11,6 @@ const cors = require('cors');
 const middlewares = require('./middlewares/middlewares.js');
 const db = require('./database/database.js');
 
-
 // Setting up DB
 const usersDB = db.usersDB;
 const database = db.sensorDataDB;
@@ -48,24 +47,24 @@ app.get("/api", middlewares.checkAuth, (req, res) => {
   console.log(req.query);
   let limitRecords = parseInt(req.query.limit);
   let fromTime = 0;
-  if(req.query.fromTime){
-      fromTime = parseInt(req.query.fromTime);
+  if (req.query.fromTime) {
+    fromTime = parseInt(req.query.fromTime);
   }
 
-console.log(fromTime);
+  console.log(fromTime);
   database
-  .find({UserName: req.user.UserName, TimeStamp: { $gt: fromTime }}, {sort: {TimeStamp: -1}, limit: limitRecords}, (error, data) => {
-    if (error != null) {      
-      console.log("Database Query Error:");
-      console.log(error);
-      res.sendStatus(500);
-    } else {
-      console.log('Ok, responding...');
-      res.json(data.reverse()); //damos vuelta el array para que esetn ordenados del mas viejo al mas nuevo
-    }
-  });
+    .find({ UserName: req.user.UserName, TimeStamp: { $gt: fromTime } }, { projection: { SensorData: { $elemMatch: { SensorName: req.query.SensorName } } } },
+      (error, data) => {
+        if (error != null) {
+          console.log("Database Query Error:");
+          console.log(error);
+          res.sendStatus(500);
+        } else {
+          console.log('Ok, responding...');
+          res.json(data); //damos vuelta el array para que esetn ordenados del mas viejo al mas nuevo
+        }
+      });
 });
-
 
 /*----------------------------------------------
 POST TODO:
@@ -84,7 +83,7 @@ app.post("/apiv0", (req, res) => {
   let date = new Date(Date.now()).toLocaleString();
   console.log(date + ": Got a POST request on /api from " + req.hostname + " with body:");
   console.log(req.body);
-  usersDB.find({UserName: req.body.UserName}, (dbErr, docs) => {
+  usersDB.find({ UserName: req.body.UserName }, (dbErr, docs) => {
     if (docs.length && docs[0].SensorKey == req.body.SensorKey) {
       const timeStamp = Date.now();
       const doc = {
@@ -98,7 +97,7 @@ app.post("/apiv0", (req, res) => {
       };
       console.log('Inserting data to DB');
       database.insert(doc);
-    
+
       res.json({
         status: "success"
       });
@@ -115,47 +114,46 @@ app.post("/apiv0", (req, res) => {
 //------------------
 app.post("/api", (req, res, next) => {
   console.log('Request on /api with device key: ', req.body.DeviceKey)
-  usersDB.find({'Devices.DeviceKey' : req.body.DeviceKey},
-  {projection: {Devices: {$elemMatch: {DeviceKey: req.body.DeviceKey}}, UserName: 1}},
-  (dbError, docs)=>{
-    //falta handel dberror
-    console.log(docs);
-    if(docs.length != 1){
-      // incorrect key or duplicate key (very very unlikely)
-      // respond with auth failed
-      console.log("incorrect key or duplicate key (very very unlikely");
-      res.statusCode = 401;
-      return next(new Error('Auth Failed.'));
-    }
-    let docToInsert = {
-      UserName : docs[0].UserName,
-      DeviceName: docs[0].Devices[0].DeviceName,
-      ServerTimeStamp: Date.now(),
-      SensorData:[]
-    }
-    console.log(req.body);
-    let sensors = docs[0].Devices[0].Sensors;
-    for(let i=0; i < req.body.Values.length; i++){
-      let sensIndex = req.body.Values[i].SensorIndex;
-      if(sensIndex < sensors.length){
-        console.log('sensor index ' + sensIndex);
-        docToInsert.SensorData.push({        
-          SensorName: sensors[sensIndex].SensorName,
-          Value: req.body.Values[i].Value,
-          Unit: sensors[sensIndex].SensorUnit,
-          TimeStamp: req.body.Values[i].TimeStamp
-        });
-      } else {
-        res.statusCode = 400;
-        console.log('Sensor index ' + sensIndex + ' is out of range.')
-        return next(new Error('Sensor index out of range.'));
+  usersDB.find({ 'Devices.DeviceKey': req.body.DeviceKey }, { projection: { Devices: { $elemMatch: { DeviceKey: req.body.DeviceKey } }, UserName: 1 } },
+    (dbError, docs) => {
+      //falta handel dberror
+      console.log(docs);
+      if (docs.length != 1) {
+        // incorrect key or duplicate key (very very unlikely)
+        // respond with auth failed
+        console.log("incorrect key or duplicate key (very very unlikely");
+        res.statusCode = 401;
+        return next(new Error('Auth Failed.'));
       }
-    }
-    database.insert(docToInsert, (dbError, result) =>{
-      if(dbError) return res.json(dbError)
-      return res.json({status: 'success'})
-    })
-  });
+      let docToInsert = {
+        UserName: docs[0].UserName,
+        DeviceName: docs[0].Devices[0].DeviceName,
+        ServerTimeStamp: Date.now(),
+        SensorData: []
+      }
+      console.log(req.body);
+      let sensors = docs[0].Devices[0].Sensors;
+      for (let i = 0; i < req.body.Values.length; i++) {
+        let sensIndex = req.body.Values[i].SensorIndex;
+        if (sensIndex < sensors.length) {
+          console.log('sensor index ' + sensIndex);
+          docToInsert.SensorData.push({
+            SensorName: sensors[sensIndex].SensorName,
+            Value: req.body.Values[i].Value,
+            Unit: sensors[sensIndex].SensorUnit,
+            TimeStamp: req.body.Values[i].TimeStamp
+          });
+        } else {
+          res.statusCode = 400;
+          console.log('Sensor index ' + sensIndex + ' is out of range.')
+          return next(new Error('Sensor index out of range.'));
+        }
+      }
+      database.insert(docToInsert, (dbError, result) => {
+        if (dbError) return res.json(dbError)
+        return res.json({ status: 'success' })
+      })
+    });
 });
 
 function notFound(req, res, next) {
@@ -169,7 +167,7 @@ function errorHandeler(err, req, res, next) {
   console.log('Error handeler');
   console.log(res.statusCode);
   console.log(err);
-  if(!res.statusCode || res.statusCode == 200) res.status(500);
+  if (!res.statusCode || res.statusCode == 200) res.status(500);
   res.json({
     message: err.message,
     // stack: err.stack,
