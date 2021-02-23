@@ -5,7 +5,12 @@
 
  This is a project made for learning backend development, frontend development and IoT (Front end, hardware and firmware for the Logging sensor is in a separate repository).
 
+ Backend: https://wattapp-backend.herokuapp.com/api
+ 
+ Frontend: https://wattapp-frontend.herokuapp.com/
+
  Frontend repo: https://github.com/Agustin-Q/WattApp-frontend
+ 
  Arduino library repo: coming soon... 😁
 
  Backend is built using Node.js and the following libraries:
@@ -21,23 +26,24 @@
 --------------------------------------------------
 ## ToDo's 💪
 
-[x] Update User Creation to new schema
-[x] Drop the user collection
-[x] add route for creating Devices
-[x] Modify route for generating DeviceKey
-[ ] Add route for creating Sensors
-[ ] Modify api/ route for new incoming data
-[x] Migrate to Mongo DB
-[ ] Handle DB connection error
-[x] Define schema for incoming sensor data
-[ ] Validate incoming sensor data
-[ ] handel bad request when creating devices
-[ ] handel bad request when creating sensors
+- [x] Update User Creation to new schema
+- [x] Drop the user collection
+- [x] Add route for creating Devices
+- [x] Modify route for generating DeviceKey
+- [ ] Hash passwords before storing in DB
+- [ ] Add route for creating Sensors
+- [ ] Modify api/ route for new incoming data
+- [x] Migrate to Mongo DB
+- [ ] Handle DB connection error
+- [x] Define schema for incoming sensor data
+- [ ] Validate incoming sensor data
+- [ ] Handel bad request when creating devices
+- [ ] Handel bad request when creating sensors
 
 
 
 ------------------------------------------------
-### user data schema
+### User Data Scheme
 
 ```javascript
 {
@@ -59,7 +65,7 @@
   ]
 }
 ```
-new user:
+Adding a new user:
 
 ```javascript
 {
@@ -86,7 +92,7 @@ new user:
 
 
 
-### sensor data schema
+### Sensor Data Scheme
 
 ```javascript
 {
@@ -112,7 +118,7 @@ new user:
   }
 ```
 
-Data schema send by device
+Sensor data schema send by device:
 ```javascript
 {
   deviceKey: "gRfgGHr4H54fghsfdg",
@@ -125,104 +131,3 @@ Data schema send by device
   ]
 }
 ```
-
-
-
-
-------------
-Other option enbedded data model.
-Pros:
-All data is the same collection
-No duplicate data
-Cons:
-when retreving sensor data for one moment, all data from user must be retrieved.
-
-```javascript
-{
-  UserName: "myName",
-  Password: "myPassword",
-  devices: [
-    {
-    deviceName: "myDeviceName", 
-    deviceDescription: "deviceDescription",
-    deviceKey: "gRfgGHr4H54fghsfdg"
-    sensors:[
-      {
-      sensorIndex:0, // igual al index en el array
-      sensorType:"sensorType",
-      sensorUnit: "sensorUnit",
-      data: [
-        {value: 1234, timestamp: 1699034, serverTimestamp: 168964355},
-      ]
-      },
-    },
-  ]
-}
-
-db.find({UserName: "myUsername"})
-docs.devices[0].sensors[0].data[0].value
-```
-
-
------------
-test data
-
-[
-  {
-    "UserName": "myName",
-    "Password": "myPassword",
-    "devices": [
-      {
-        "deviceName": "myDeviceName",
-        "deviceDescription": "deviceDescription",
-        "deviceKey": "a",
-        "sensors": [
-          {
-            "sensorIndex": 0,
-            "sensorType": "sensorType",
-            "sensorUnit": "sensorUnit",
-            
-          },
-          
-        ],
-        
-      },
-      {
-        "deviceName": "myDeviceName",
-        "deviceDescription": "deviceDescription",
-        "deviceKey": "c",
-        "sensors": [
-          {
-            "sensorIndex": 0,
-            "sensorType": "sensorType",
-            "sensorUnit": "sensorUnit",
-            
-          },
-          
-        ],
-        
-      }
-    ]
-  },
-  {
-    "UserName": "user2",
-    "Password": "myPassword",
-    "devices": [
-      {
-        "deviceName": "myDeviceName",
-        "deviceDescription": "deviceDescription",
-        "deviceKey": "b",
-        "sensors": [
-          {
-            "sensorIndex": 0,
-            "sensorType": "sensorType",
-            "sensorUnit": "sensorUnit",
-            
-          },
-          
-        ],
-        
-      }
-    ]
-  }
-]
